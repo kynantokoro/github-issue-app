@@ -1,6 +1,10 @@
 import React, { Fragment } from "react";
 import spinner from "./spinner.gif";
 
+/**
+ *非同期処理でローディング中に表示
+ */
+
 const Spinner = () => {
   <Fragment>
     <img
