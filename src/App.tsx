@@ -180,7 +180,6 @@ const App = () => {
 
   useEffect(() => {
     getFinalPage();
-    //getIssues();
   }, []);
 
   return (

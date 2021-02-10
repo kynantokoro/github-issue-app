@@ -31,7 +31,9 @@ const Pagenation: React.FC<Props> = ({
         <Fragment>
           <nav aria-label="Page navigation example">
             <ul className="pagination justify-content-center">
-              <li className="page-item">
+              <li
+                className={"page-item" + (currentPage === 1 ? " disabled" : "")}
+              >
                 <button className="page-link" onClick={handlePrev}>
                   前
                 </button>
@@ -198,7 +200,11 @@ const Pagenation: React.FC<Props> = ({
                   {finalPage}
                 </button>
               </li>
-              <li className="page-item">
+              <li
+                className={
+                  "page-item" + (currentPage === finalPage ? " disabled" : "")
+                }
+              >
                 <button className="page-link" onClick={handleNext}>
                   次
                 </button>
