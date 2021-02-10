@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import Navbar from "./components/Navbar";
 import About from "./components/About";
 import Issues from "./components/Issues";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Issue from "./components/Issue";
+import Pagination from "./components/Pagenation";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  useLocation,
+  Redirect,
+} from "react-router-dom";
 import axios from "axios";
 
 let githubCliendId: string | undefined;
@@ -17,15 +25,23 @@ if (process.env.NODE_ENV !== "production") {
   githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
 }
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 const App = () => {
   const [issues, setIssues] = useState([]);
+  const [issue, setIssue] = useState({});
   const [loading, setLoading] = useState(false);
+  const [pgnationLoading, setPgnationLoading] = useState(false);
   const [perPage, setPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [finalPage, setFinalPage] = useState(20);
 
   //Paginationの末尾のページ番号を取得
   const getFinalPage = async () => {
+    setPgnationLoading(true);
+
     console.log("calcFinalPage");
     let batch1Pagenumber: number;
     let batch1Pagenumbers: number[] = [];
@@ -100,10 +116,9 @@ const App = () => {
     //計算終了！！
     finalPagenumber = Math.min.apply(null, batch2Pagenumbers) - 1;
 
-    console.log("finalPagenumber");
-    console.log(finalPagenumber);
-    console.log(httpRequestCount);
+    console.log("http request for pagination was...: " + httpRequestCount);
 
+    setPgnationLoading(false);
     setFinalPage(finalPagenumber);
   };
 
@@ -112,7 +127,7 @@ const App = () => {
     console.log("GetIssues");
     setLoading(true);
     const res = await axios.get(
-      `https://api.github.com/repos/facebook/react/issues?page=${currentPage}&per_page${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
+      `https://api.github.com/repos/facebook/react/issues?page=${currentPage}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 
     console.log(res);
@@ -127,6 +142,9 @@ const App = () => {
     const res = await axios.get(
       `https://api.github.com/repos/facebook/react/issues/${issue_number}?client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
+
+    console.log(res.data);
+    setIssue(res.data);
     setLoading(false);
   };
 
@@ -140,23 +158,48 @@ const App = () => {
       <div className="App">
         <Navbar />
         <div className="container p-3">
-          <div className="card card-body">
-            <Switch>
-              <Route
-                exact
-                path="/"
-                render={(props) => (
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={(props) => <Redirect to="/issues" />}
+            ></Route>
+            <Route
+              exact
+              path="/issues"
+              render={(props) => (
+                <Fragment>
                   <Issues
                     {...props}
-                    getIssue={getIssue}
                     getIssues={getIssues}
+                    issues={issues}
+                    loading={loading}
                   />
-                )}
-              ></Route>
-              <Route exact path="/about" component={About}></Route>
-              <Route exact path="/issues/:number"></Route>
-            </Switch>
-          </div>
+                  <Pagination
+                    {...props}
+                    finalPage={finalPage}
+                    loading={pgnationLoading}
+                    currentPage={currentPage}
+                  />
+                </Fragment>
+              )}
+            ></Route>
+            <Route exact path="/about" component={About}></Route>
+            <Route
+              exact
+              path="/issues/:number"
+              render={(props) => (
+                <Fragment>
+                  <Issue
+                    {...props}
+                    getIssue={getIssue}
+                    loading={loading}
+                    issue={issue}
+                  />
+                </Fragment>
+              )}
+            ></Route>
+          </Switch>
         </div>
       </div>
     </Router>
