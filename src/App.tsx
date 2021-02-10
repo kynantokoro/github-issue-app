@@ -13,6 +13,8 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 
+import { IssuesResponse } from "./types";
+
 let githubCliendId: string | undefined;
 let githubClientSecret: string | undefined;
 
@@ -26,7 +28,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const App = () => {
-  const [issues, setIssues] = useState([]);
+  const [issues, setIssues] = useState<IssuesResponse>([]);
   const [issue, setIssue] = useState({});
   const [loading, setLoading] = useState(false);
   const [pgnationLoading] = useState(false);
@@ -40,7 +42,7 @@ const App = () => {
   //現ページのIssues一覧を取得
   const getIssues = async (num: number) => {
     setLoading(true);
-    const res = await axios.get(
+    const res = await axios.get<IssuesResponse>(
       `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 

@@ -2,10 +2,11 @@ import React, { useEffect, Fragment } from "react";
 import IssueItem from "./IssueItem";
 import Spinner from "./Spinner";
 
+import { IssuesResponse } from "../types";
+
 interface Props {
-  getIssues: any;
-  issues: any;
-  match: any;
+  getIssues: (num: number) => Promise<void>;
+  issues: IssuesResponse;
   loading: boolean;
   currentPage: number;
 }
@@ -13,7 +14,6 @@ interface Props {
 const Issues: React.FC<Props> = ({
   getIssues,
   issues,
-  match,
   loading,
   currentPage,
 }) => {
@@ -26,7 +26,7 @@ const Issues: React.FC<Props> = ({
   } else {
     return (
       <ul className="list-group mb-5">
-        {issues.map((issue: any) => (
+        {issues.map((issue) => (
           <IssueItem
             key={issue.number}
             issueNumber={issue.number}
