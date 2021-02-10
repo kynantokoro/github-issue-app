@@ -29,8 +29,8 @@ const App = () => {
   const [issues, setIssues] = useState([]);
   const [issue, setIssue] = useState({});
   const [loading, setLoading] = useState(false);
-  const [pgnationLoading, setPgnationLoading] = useState(false);
-  const [perPage, setPerPage] = useState(10);
+  const [pgnationLoading] = useState(false);
+  const [perPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(
     Number(useLocation().search.replace("?page=", ""))
   );
