@@ -34,7 +34,7 @@ const App = () => {
     let finalPagenumber: number = 0;
     let ended: boolean = false;
     let httpRequestCount: number = 0;
-    const batch1ParallelRequestCount: number = 7;
+    const batch1ParallelRequestCount: number = 10;
     const batch2ParallelRequestCount: number = 5;
     let pages: number[] = new Array(batch1ParallelRequestCount).fill(0);
 
@@ -52,22 +52,22 @@ const App = () => {
           );
           httpRequestCount++;
           if (res.data.length === 0) {
-            batch1Pagenumbers.push(ii + i + 1);
+            batch1Pagenumbers.push(ii * batch1ParallelRequestCount + i + 1);
             ended = true;
           }
         })
       );
       ii++;
-      if (ii > 5) {
-        console.log("TOO MANY ITERATION");
-        break;
-      }
     } while (!ended);
 
     //Batch2のスタート地点batch2Pagenumberを算出
+    console.log("batch1Pagenumbers");
+    console.log(batch1Pagenumbers);
     batch1Pagenumber = Math.min.apply(null, batch1Pagenumbers);
     ended = false;
     batch2Pagenumber = Math.floor(((batch1Pagenumber - 2) * 100) / perPage);
+    console.log("batch2Pagenumber");
+    console.log(batch2Pagenumber);
     pages = new Array(batch2ParallelRequestCount).fill(0);
 
     //Batch2
@@ -82,22 +82,25 @@ const App = () => {
               batch2Pagenumber + ii * batch2ParallelRequestCount + i
             }&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
           );
+          console.log(
+            "res" + (batch2Pagenumber + ii * batch2ParallelRequestCount + i)
+          );
+          console.log(res.data);
           httpRequestCount++;
           if (res.data.length === 0) {
-            batch2Pagenumbers.push(batch2Pagenumber + ii + i);
+            batch2Pagenumbers.push(
+              batch2Pagenumber + ii * batch2ParallelRequestCount + i
+            );
             ended = true;
           }
         })
       );
       ii++;
-      if (ii > 5) {
-        console.log("TOO MANY ITERATION");
-        break;
-      }
     } while (!ended);
     //計算終了！！
     finalPagenumber = Math.min.apply(null, batch2Pagenumbers) - 1;
 
+    console.log("finalPagenumber");
     console.log(finalPagenumber);
     console.log(httpRequestCount);
 
@@ -128,7 +131,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    getFinalPage();
+    //getFinalPage();
     //getIssues();
   }, []);
 
