@@ -37,73 +37,6 @@ const App = () => {
   const [finalPage, setFinalPage] = useState(20);
   const history = useHistory();
 
-  //Paginationの末尾のページ番号を取得
-  const getFinalPage = async () => {
-    setPgnationLoading(true);
-    let batch1Pagenumber: number;
-    let batch1Pagenumbers: number[] = [];
-    let batch2Pagenumber: number;
-    let batch2Pagenumbers: number[] = [];
-    let finalPagenumber: number = 0;
-    let ended: boolean = false;
-    const batch1ParallelRequestCount: number = 10;
-    const batch2ParallelRequestCount: number = 5;
-    let pages: number[] = new Array(batch1ParallelRequestCount).fill(0);
-
-    //Batch1
-    //100エントリーごとでおおまかな末尾ページを算出
-    let ii = 0;
-    do {
-      await Promise.all(
-        pages.map(async (n, i) => {
-          let res = await axios.get(
-            `https://api.github.com/repos/facebook/react/issues?page=${
-              ii * batch1ParallelRequestCount + i + 1
-            }&per_page=100&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
-          );
-          if (res.data.length === 0) {
-            batch1Pagenumbers.push(ii * batch1ParallelRequestCount + i + 1);
-            ended = true;
-          }
-        })
-      );
-      ii++;
-    } while (!ended);
-
-    //Batch2のスタート地点batch2Pagenumberを算出
-    batch1Pagenumber = Math.min.apply(null, batch1Pagenumbers);
-    ended = false;
-    batch2Pagenumber = Math.floor(((batch1Pagenumber - 2) * 100) / perPage);
-    pages = new Array(batch2ParallelRequestCount).fill(0);
-
-    //Batch2
-    //実際のページ表示のエントリー数で末尾ページを算出
-    ii = 0;
-    do {
-      await Promise.all(
-        pages.map(async (n, i) => {
-          let res = await axios.get(
-            `https://api.github.com/repos/facebook/react/issues?page=${
-              batch2Pagenumber + ii * batch2ParallelRequestCount + i
-            }&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
-          );
-          if (res.data.length === 0) {
-            batch2Pagenumbers.push(
-              batch2Pagenumber + ii * batch2ParallelRequestCount + i
-            );
-            ended = true;
-          }
-        })
-      );
-      ii++;
-    } while (!ended);
-    //計算終了！！
-    finalPagenumber = Math.min.apply(null, batch2Pagenumbers) - 1;
-
-    setPgnationLoading(false);
-    setFinalPage(finalPagenumber);
-  };
-
   //現ページのIssues一覧を取得
   const getIssues = async (num: number) => {
     setLoading(true);
@@ -111,8 +44,15 @@ const App = () => {
       `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 
+    // Paginationの末尾のページ番号を取得
+    // これはレスポンスヘッダに含まれるLinkから取得できる
+    const page = extractFinalPageFromLinkHeader(res.headers.link);
     setIssues(res.data);
     setLoading(false);
+
+    if (page) {
+      setFinalPage(Number(page));
+    }
   };
 
   const getIssue = async (issue_number: string) => {
@@ -155,7 +95,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    getFinalPage();
     handleFirst();
   }, []);
 
@@ -214,6 +153,20 @@ const App = () => {
       </div>
     </div>
   );
+};
+
+const extractFinalPageFromLinkHeader = (link: string): string | undefined => {
+  // link headerは次のような形で来る https://docs.github.com/en/rest/guides/traversing-with-pagination
+  // "<https://api.github.com/repositories/10270250/issues?page=2&per_page=10>; rel=\"next\", <https://api.github.com/repositories/10270250/issues?page=74&per_page=10>; rel=\"last\""
+
+  // rel=lastを取得すると最後のpageが分かる
+  const lastrel = link.split(",").filter((s) => s.includes('rel="last"'))[0];
+  if (!lastrel) return;
+
+  const matched = lastrel.match(/page=(\d+).*$/);
+  if (!matched) return;
+
+  return matched[1];
 };
 
 export default App;
