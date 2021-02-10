@@ -66,30 +66,30 @@ const App = () => {
     setLoading(false);
   };
 
-  const handleNext: any = () => {
+  const handleNext = () => {
     const page = currentPage + 1;
     setCurrentPage(page);
     history.push(`/issues?page=${page}`);
   };
 
-  const handleLast: any = () => {
+  const handleLast = () => {
     const page = finalPage;
     setCurrentPage(page);
     history.push(`/issues?page=${page}`);
   };
 
-  const handlePrev: any = () => {
+  const handlePrev = () => {
     const page = currentPage - 1;
     setCurrentPage(page);
     history.push(`/issues?page=${page}`);
   };
 
-  const handleFirst: any = () => {
+  const handleFirst = () => {
     setCurrentPage(1);
     history.push(`/issues?page=1`);
   };
 
-  const handleNumber: any = (num: number) => {
+  const handleNumber = (num: number): void => {
     setCurrentPage(num);
     history.push(`/issues?page=${num}`);
   };
