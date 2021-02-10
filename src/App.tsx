@@ -171,6 +171,13 @@ const App = () => {
     history.push(`/issues?page=1`);
   };
 
+  const handleNumber: any = (num: number) => {
+    console.log("num");
+    console.log(num);
+    setCurrentPage(num);
+    history.push(`/issues?page=${num}`);
+  };
+
   useEffect(() => {
     getFinalPage();
     //getIssues();
@@ -206,6 +213,7 @@ const App = () => {
                   handlePrev={handlePrev}
                   handleFirst={handleFirst}
                   handleLast={handleLast}
+                  handleNumber={handleNumber}
                   loading={pgnationLoading}
                 />
               </Fragment>
