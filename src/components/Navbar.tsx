@@ -1,11 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Navbar = () => {
+interface Props {
+  handleFirst: any;
+}
+
+const Navbar: React.FC<Props> = ({ handleFirst }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div className="container">
-        <Link className="navbar-brand " to="/">
+        <Link to="/" className="navbar-brand" onClick={handleFirst}>
           <i className="fab fa-github fa-lg me-2"></i>
           Github Issue ブラウザー
         </Link>

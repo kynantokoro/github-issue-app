@@ -40,15 +40,12 @@ const App = () => {
   //Paginationの末尾のページ番号を取得
   const getFinalPage = async () => {
     setPgnationLoading(true);
-
-    console.log("calcFinalPage");
     let batch1Pagenumber: number;
     let batch1Pagenumbers: number[] = [];
     let batch2Pagenumber: number;
     let batch2Pagenumbers: number[] = [];
     let finalPagenumber: number = 0;
     let ended: boolean = false;
-    let httpRequestCount: number = 0;
     const batch1ParallelRequestCount: number = 10;
     const batch2ParallelRequestCount: number = 5;
     let pages: number[] = new Array(batch1ParallelRequestCount).fill(0);
@@ -59,13 +56,11 @@ const App = () => {
     do {
       await Promise.all(
         pages.map(async (n, i) => {
-          console.log("11111");
           let res = await axios.get(
             `https://api.github.com/repos/facebook/react/issues?page=${
               ii * batch1ParallelRequestCount + i + 1
             }&per_page=100&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
           );
-          httpRequestCount++;
           if (res.data.length === 0) {
             batch1Pagenumbers.push(ii * batch1ParallelRequestCount + i + 1);
             ended = true;
@@ -76,13 +71,9 @@ const App = () => {
     } while (!ended);
 
     //Batch2のスタート地点batch2Pagenumberを算出
-    console.log("batch1Pagenumbers");
-    console.log(batch1Pagenumbers);
     batch1Pagenumber = Math.min.apply(null, batch1Pagenumbers);
     ended = false;
     batch2Pagenumber = Math.floor(((batch1Pagenumber - 2) * 100) / perPage);
-    console.log("batch2Pagenumber");
-    console.log(batch2Pagenumber);
     pages = new Array(batch2ParallelRequestCount).fill(0);
 
     //Batch2
@@ -91,17 +82,11 @@ const App = () => {
     do {
       await Promise.all(
         pages.map(async (n, i) => {
-          console.log("2222");
           let res = await axios.get(
             `https://api.github.com/repos/facebook/react/issues?page=${
               batch2Pagenumber + ii * batch2ParallelRequestCount + i
             }&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
           );
-          console.log(
-            "res" + (batch2Pagenumber + ii * batch2ParallelRequestCount + i)
-          );
-          console.log(res.data);
-          httpRequestCount++;
           if (res.data.length === 0) {
             batch2Pagenumbers.push(
               batch2Pagenumber + ii * batch2ParallelRequestCount + i
@@ -115,35 +100,28 @@ const App = () => {
     //計算終了！！
     finalPagenumber = Math.min.apply(null, batch2Pagenumbers) - 1;
 
-    console.log("http request for pagination was...: " + httpRequestCount);
-
     setPgnationLoading(false);
     setFinalPage(finalPagenumber);
   };
 
   //現ページのIssues一覧を取得
   const getIssues = async (num: number) => {
-    console.log("GetIssues");
-    console.log(currentPage);
     setLoading(true);
     const res = await axios.get(
       `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 
-    console.log(res);
     setIssues(res.data);
     setLoading(false);
   };
 
   const getIssue = async (issue_number: string) => {
-    console.log("GetIssue");
     setLoading(true);
 
     const res = await axios.get(
       `https://api.github.com/repos/facebook/react/issues/${issue_number}?client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 
-    console.log(res.data);
     setIssue(res.data);
     setLoading(false);
   };
@@ -172,19 +150,18 @@ const App = () => {
   };
 
   const handleNumber: any = (num: number) => {
-    console.log("num");
-    console.log(num);
     setCurrentPage(num);
     history.push(`/issues?page=${num}`);
   };
 
   useEffect(() => {
     getFinalPage();
+    handleFirst();
   }, []);
 
   return (
     <div className="App">
-      <Navbar />
+      <Navbar handleFirst={handleFirst} />
       <div className="container p-3">
         <Switch>
           <Route

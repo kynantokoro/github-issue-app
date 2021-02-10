@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
 import Spinner from "./Spinner";
-import { Link } from "react-router-dom";
 
 interface Props {
   finalPage: number;

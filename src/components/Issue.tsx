@@ -1,6 +1,5 @@
 import React, { useEffect, Fragment } from "react";
 import Spinner from "./Spinner";
-import { useLocation } from "react-router-dom";
 
 interface Props {
   getIssue: any;
