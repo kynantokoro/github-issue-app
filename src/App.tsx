@@ -5,11 +5,11 @@ import Issues from "./components/Issues";
 import Issue from "./components/Issue";
 import Pagination from "./components/Pagenation";
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
-  useLocation,
   Redirect,
+  useLocation,
+  useHistory,
 } from "react-router-dom";
 import axios from "axios";
 
@@ -25,18 +25,17 @@ if (process.env.NODE_ENV !== "production") {
   githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
 }
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
-
 const App = () => {
   const [issues, setIssues] = useState([]);
   const [issue, setIssue] = useState({});
   const [loading, setLoading] = useState(false);
   const [pgnationLoading, setPgnationLoading] = useState(false);
   const [perPage, setPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(
+    Number(useLocation().search.replace("?page=", ""))
+  );
   const [finalPage, setFinalPage] = useState(20);
+  const history = useHistory();
 
   //Paginationの末尾のページ番号を取得
   const getFinalPage = async () => {
@@ -123,11 +122,12 @@ const App = () => {
   };
 
   //現ページのIssues一覧を取得
-  const getIssues = async () => {
+  const getIssues = async (num: number) => {
     console.log("GetIssues");
+    console.log(currentPage);
     setLoading(true);
     const res = await axios.get(
-      `https://api.github.com/repos/facebook/react/issues?page=${currentPage}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
+      `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 
     console.log(res);
@@ -148,61 +148,87 @@ const App = () => {
     setLoading(false);
   };
 
+  const handleNext: any = () => {
+    const page = currentPage + 1;
+    setCurrentPage(page);
+    history.push(`/issues?page=${page}`);
+  };
+
+  const handleLast: any = () => {
+    const page = finalPage;
+    setCurrentPage(page);
+    history.push(`/issues?page=${page}`);
+  };
+
+  const handlePrev: any = () => {
+    const page = currentPage - 1;
+    setCurrentPage(page);
+    history.push(`/issues?page=${page}`);
+  };
+
+  const handleFirst: any = () => {
+    setCurrentPage(1);
+    history.push(`/issues?page=1`);
+  };
+
   useEffect(() => {
-    //getFinalPage();
+    getFinalPage();
     //getIssues();
   }, []);
 
   return (
-    <Router>
-      <div className="App">
-        <Navbar />
-        <div className="container p-3">
-          <Switch>
-            <Route
-              exact
-              path="/"
-              render={(props) => <Redirect to="/issues" />}
-            ></Route>
-            <Route
-              exact
-              path="/issues"
-              render={(props) => (
-                <Fragment>
-                  <Issues
-                    {...props}
-                    getIssues={getIssues}
-                    issues={issues}
-                    loading={loading}
-                  />
-                  <Pagination
-                    {...props}
-                    finalPage={finalPage}
-                    loading={pgnationLoading}
-                    currentPage={currentPage}
-                  />
-                </Fragment>
-              )}
-            ></Route>
-            <Route exact path="/about" component={About}></Route>
-            <Route
-              exact
-              path="/issues/:number"
-              render={(props) => (
-                <Fragment>
-                  <Issue
-                    {...props}
-                    getIssue={getIssue}
-                    loading={loading}
-                    issue={issue}
-                  />
-                </Fragment>
-              )}
-            ></Route>
-          </Switch>
-        </div>
+    <div className="App">
+      <Navbar />
+      <div className="container p-3">
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={(props) => <Redirect to="/issues?page=1" />}
+          ></Route>
+          <Route
+            exact
+            path="/issues"
+            render={(props) => (
+              <Fragment>
+                <Issues
+                  {...props}
+                  getIssues={getIssues}
+                  issues={issues}
+                  loading={loading}
+                  currentPage={currentPage}
+                />
+                <Pagination
+                  {...props}
+                  currentPage={currentPage}
+                  finalPage={finalPage}
+                  handleNext={handleNext}
+                  handlePrev={handlePrev}
+                  handleFirst={handleFirst}
+                  handleLast={handleLast}
+                  loading={pgnationLoading}
+                />
+              </Fragment>
+            )}
+          ></Route>
+          <Route exact path="/about" component={About}></Route>
+          <Route
+            exact
+            path="/issues/:number"
+            render={(props) => (
+              <Fragment>
+                <Issue
+                  {...props}
+                  getIssue={getIssue}
+                  loading={loading}
+                  issue={issue}
+                />
+              </Fragment>
+            )}
+          ></Route>
+        </Switch>
       </div>
-    </Router>
+    </div>
   );
 };
 

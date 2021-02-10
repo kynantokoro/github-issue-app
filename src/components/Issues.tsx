@@ -1,19 +1,27 @@
 import React, { useEffect, Fragment } from "react";
 import IssueItem from "./IssueItem";
 import Spinner from "./Spinner";
+import { useLocation } from "react-router-dom";
 
 interface Props {
   getIssues: any;
   issues: any;
   match: any;
   loading: boolean;
+  currentPage: number;
 }
 
-const Issues: React.FC<Props> = ({ getIssues, issues, match, loading }) => {
+const Issues: React.FC<Props> = ({
+  getIssues,
+  issues,
+  match,
+  loading,
+  currentPage,
+}) => {
   useEffect(() => {
-    getIssues();
-  }, []);
-  console.log(issues);
+    getIssues(currentPage);
+  }, [currentPage]);
+
   if (loading) {
     return <Spinner />;
   } else {

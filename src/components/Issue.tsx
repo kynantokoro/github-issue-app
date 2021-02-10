@@ -1,5 +1,6 @@
 import React, { useEffect, Fragment } from "react";
 import Spinner from "./Spinner";
+import { useLocation } from "react-router-dom";
 
 interface Props {
   getIssue: any;
@@ -18,6 +19,8 @@ const Issue: React.FC<Props> = ({ getIssue, match, loading, issue }) => {
   } else {
     return (
       <div className="card card-body">
+        <h3>issue番号</h3>
+        <p>{match.params.number}</p>
         <h3>タイトル</h3>
         <p>{issue.title}</p>
         <h3>本文</h3>

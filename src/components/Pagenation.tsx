@@ -6,48 +6,60 @@ interface Props {
   finalPage: number;
   loading: boolean;
   currentPage: number;
+  handleNext: any;
+  handlePrev: any;
+  handleFirst: any;
+  handleLast: any;
 }
 
-const Pagenation: React.FC<Props> = ({ finalPage, loading, currentPage }) => {
+const Pagenation: React.FC<Props> = ({
+  finalPage,
+  loading,
+  currentPage,
+  handleNext,
+  handlePrev,
+  handleFirst,
+  handleLast,
+}) => {
   if (loading) {
     return <Spinner />;
   } else {
-    let previousLink = `/issues/${currentPage - 1}`;
-    let nextLink = `/issues/${currentPage + 1}`;
-    let finalLink = `/issues/${finalPage}`;
+    let previousLink = `/issues?page=${currentPage - 1}`;
+    let nextLink = `/issues?page=${currentPage + 1}`;
+    let finalLink = `/issues?page=${finalPage}`;
     return (
       <Fragment>
+        <p>{currentPage}</p>
         <nav aria-label="Page navigation example">
           <ul className="pagination justify-content-center">
             <li className="page-item">
-              <Link to="/" className="page-link">
-                Previous
-              </Link>
+              <button className="page-link" onClick={handlePrev}>
+                前
+              </button>
             </li>
             <li className="page-item active">
-              <a className="page-link" href="#">
+              <button className="page-link" onClick={handleFirst}>
                 1
-              </a>
+              </button>
             </li>
             <li className="page-item">
-              <a className="page-link" href="#">
-                2
-              </a>
+              <button className="page-link">...</button>
             </li>
             <li className="page-item">
-              <a className="page-link" href="#">
-                3
-              </a>
+              <button className="page-link">{currentPage}</button>
             </li>
             <li className="page-item">
-              <Link to={finalLink} className="page-link">
+              <button className="page-link">...</button>
+            </li>
+            <li className="page-item">
+              <button className="page-link" onClick={handleLast}>
                 {finalPage}
-              </Link>
+              </button>
             </li>
             <li className="page-item">
-              <a className="page-link" href="#">
-                Next
-              </a>
+              <button className="page-link" onClick={handleNext}>
+                次
+              </button>
             </li>
           </ul>
         </nav>
