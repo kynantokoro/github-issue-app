@@ -15,18 +15,6 @@ import axios from "axios";
 
 import { IssuesResponse } from "./types";
 
-let githubCliendId: string | undefined;
-let githubClientSecret: string | undefined;
-
-//GithubAPIの認証ClientIDとSecretをproductionはnetlifyのサーバーの環境変数みたいなのから取得する
-if (process.env.NODE_ENV !== "production") {
-  githubCliendId = process.env.REACT_APP_GITHUB_CLIENT_ID;
-  githubClientSecret = process.env.REACT_APP_GITHUB_CLIENT_SECRET;
-} else {
-  githubCliendId = process.env.GITHUB_CLIENT_ID;
-  githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
-}
-
 const App = () => {
   const [issues, setIssues] = useState<IssuesResponse>([]);
   const [issue, setIssue] = useState({});
@@ -43,7 +31,7 @@ const App = () => {
   const getIssues = async (num: number) => {
     setLoading(true);
     const res = await axios.get<IssuesResponse>(
-      `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
+      `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}`
     );
 
     // Paginationの末尾のページ番号を取得
@@ -61,7 +49,7 @@ const App = () => {
     setLoading(true);
 
     const res = await axios.get(
-      `https://api.github.com/repos/facebook/react/issues/${issue_number}?client_id=${githubCliendId}&client_secret=${githubClientSecret}`
+      `https://api.github.com/repos/facebook/react/issues/${issue_number}`
     );
 
     setIssue(res.data);
