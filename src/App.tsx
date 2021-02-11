@@ -13,6 +13,8 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 
+import { IssuesResponse } from "./types";
+
 let githubCliendId: string | undefined;
 let githubClientSecret: string | undefined;
 
@@ -26,11 +28,11 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const App = () => {
-  const [issues, setIssues] = useState([]);
+  const [issues, setIssues] = useState<IssuesResponse>([]);
   const [issue, setIssue] = useState({});
   const [loading, setLoading] = useState(false);
-  const [pgnationLoading, setPgnationLoading] = useState(false);
-  const [perPage, setPerPage] = useState(10);
+  const [pgnationLoading] = useState(false);
+  const [perPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(
     Number(useLocation().search.replace("?page=", ""))
   );
@@ -40,7 +42,7 @@ const App = () => {
   //現ページのIssues一覧を取得
   const getIssues = async (num: number) => {
     setLoading(true);
-    const res = await axios.get(
+    const res = await axios.get<IssuesResponse>(
       `https://api.github.com/repos/facebook/react/issues?page=${num}&per_page=${perPage}&client_id=${githubCliendId}&client_secret=${githubClientSecret}`
     );
 
@@ -66,30 +68,30 @@ const App = () => {
     setLoading(false);
   };
 
-  const handleNext: any = () => {
+  const handleNext = () => {
     const page = currentPage + 1;
     setCurrentPage(page);
     history.push(`/issues?page=${page}`);
   };
 
-  const handleLast: any = () => {
+  const handleLast = () => {
     const page = finalPage;
     setCurrentPage(page);
     history.push(`/issues?page=${page}`);
   };
 
-  const handlePrev: any = () => {
+  const handlePrev = () => {
     const page = currentPage - 1;
     setCurrentPage(page);
     history.push(`/issues?page=${page}`);
   };
 
-  const handleFirst: any = () => {
+  const handleFirst = () => {
     setCurrentPage(1);
     history.push(`/issues?page=1`);
   };
 
-  const handleNumber: any = (num: number) => {
+  const handleNumber = (num: number): void => {
     setCurrentPage(num);
     history.push(`/issues?page=${num}`);
   };
